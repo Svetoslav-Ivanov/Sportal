@@ -3,6 +3,7 @@ package com.example.sportal.service;
 import com.example.sportal.dto.article.ArticleDTO;
 import com.example.sportal.dto.article.EditArticleDTO;
 import com.example.sportal.dto.article.NewArticleDTO;
+import com.example.sportal.dto.article.SearchArticleDTO;
 import com.example.sportal.model.entity.Article;
 import com.example.sportal.model.exception.InvalidDataException;
 import com.example.sportal.model.exception.NotFoundException;
@@ -37,16 +38,6 @@ public class ArticleService extends AbstractService {
         return modelMapper.map(article, ArticleDTO.class);
     }
 
-    public List<ArticleDTO> getAllByCategoryName(String categoryName) {
-        List<Article> articles = articleRepository.findAllByCategoryName(categoryName)
-                .orElseThrow(() -> new NotFoundException("Category not found!"));
-
-        return articles
-                .stream()
-                .map(a -> modelMapper.map(a, ArticleDTO.class))
-                .collect(Collectors.toList());
-    }
-
     public List<ArticleDTO> getTopFiveByDailyViews() {
         List<Article> articles = articleRepository
                 .findAllOrderByDailyViewsDesc()
@@ -67,7 +58,9 @@ public class ArticleService extends AbstractService {
 
     public ArticleDTO createArticle(NewArticleDTO dto, long authorId) {
         if (articleValidator.isValidDTO(dto)) { // TODO: Check for existing title
-            Article article = modelMapper.map(dto, Article.class);
+            Article article = new Article();
+            article.setTitle(dto.getTitle());
+            article.setText(dto.getText());
             article.setPostDate(Calendar.getInstance().getTime());
             article.setAuthor(getUserById(authorId));
             article.setDailyViews(0);
@@ -111,5 +104,16 @@ public class ArticleService extends AbstractService {
             a.setViews(0);
             articleRepository.save(a);
         });
+    }
+
+    public List<ArticleDTO> searchByTitle(SearchArticleDTO dto) {
+        List<Article> articles = articleRepository.findAllByTitleContainingIgnoreCaseOrTextContainingIgnoreCase(dto.getTitle(),dto.getTitle());
+        if (articles.size() > 0) {
+            return articles
+                    .stream()
+                    .map(a -> modelMapper.map(a, ArticleDTO.class))
+                    .collect(Collectors.toList());
+        }
+        throw new NotFoundException("Articles not found!");
     }
 }

@@ -4,7 +4,9 @@ import com.example.sportal.dto.article.ArticleDTO;
 import com.example.sportal.dto.article.EditArticleDTO;
 
 import com.example.sportal.dto.article.NewArticleDTO;
+import com.example.sportal.dto.article.SearchArticleDTO;
 import com.example.sportal.model.exception.MethodNotAllowedException;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,6 +33,11 @@ public class ArticleController extends AbstractController {
     @GetMapping("/articles/top_five_today")
     public List<ArticleDTO> getTopFiveArticlesByDailyViews() {
         return articleService.getTopFiveByDailyViews();
+    }
+
+    @GetMapping("/articles")
+    public List<ArticleDTO> searchByTitle(@RequestBody SearchArticleDTO dto) {
+        return articleService.searchByTitle(dto);
     }
 
     @DeleteMapping("/articles/{articleId}")
@@ -64,6 +71,7 @@ public class ArticleController extends AbstractController {
     public List<ArticleDTO> getAllArticlesByCategoryName(@PathVariable long categoryId) {
         return articleService.getAllByCategoryId(categoryId);
     }
+
 
     @Scheduled(cron = "0 0 0 * * *")
     public void clearDailyViews() {
