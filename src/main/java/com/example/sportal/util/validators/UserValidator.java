@@ -74,6 +74,7 @@ public class UserValidator {
         if (!ruleResult.isValid()) {
             System.out.println(ruleResult.getDetails().toString());
             throw new InvalidDataException("Invalid username!");
+
         }
         return true;
     }

@@ -15,6 +15,6 @@ public class ResetPasswordLink {
     private String URI;
     @Column(nullable = false)
     private Calendar expiresAt;
-    @OneToOne
+    @OneToOne(cascade = CascadeType.PERSIST)
     private User intendedFor;
 }

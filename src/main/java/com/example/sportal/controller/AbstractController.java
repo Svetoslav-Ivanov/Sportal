@@ -2,6 +2,8 @@ package com.example.sportal.controller;
 
 import com.example.sportal.dto.ExceptionDTO;
 import com.example.sportal.model.exception.*;
+import com.example.sportal.service.ArticleService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -21,6 +23,9 @@ public abstract class AbstractController {
     public static final String FALSE = "FALSE";
     public static final int INVALID_USER_ID = 0;
 
+    @Autowired
+    protected ArticleService articleService;
+
     public long getLoggedUserId(HttpServletRequest request) {
         HttpSession session = request.getSession();
         String ip = request.getRemoteAddr();
@@ -35,7 +40,7 @@ public abstract class AbstractController {
 
     public long getLoggedAdminId(HttpServletRequest req) {
         HttpSession session = req.getSession();
-        if (getLoggedUserId(req) != 0 && (boolean) session.getAttribute(IS_ADMIN)) {
+        if (getLoggedUserId(req) != 0 && session.getAttribute(IS_ADMIN).equals(TRUE)) {
             return (long) session.getAttribute(USER_ID);
         }
         throw new MethodNotAllowedException("You don`t have permission to do this action!");
@@ -45,15 +50,15 @@ public abstract class AbstractController {
         if (session.getAttribute(USER_ID) == null){
             throw new UserNotLoggedException("To do this action, you must be logged in");
         }
-        return session.getAttribute(IS_ADMIN) != null && session.getAttribute(IS_ADMIN) == TRUE;
+        return session.getAttribute(IS_ADMIN) != null && session.getAttribute(IS_ADMIN).equals(TRUE);
     }
 
     // TODO: Write messages
-    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(AuthenticationException.class)
     public ExceptionDTO handleAuthenticationException(Exception e) {
         return createExceptionDTO("Authentication filed: " + e.getMessage(),
-                HttpStatus.TEMPORARY_REDIRECT.value());
+                HttpStatus.UNAUTHORIZED.value());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -66,13 +71,15 @@ public abstract class AbstractController {
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(DataAlreadyExistException.class)
     public ExceptionDTO handleDataAlreadyExistExeption(Exception e) {
-        return createExceptionDTO(e.getMessage(), HttpStatus.CONFLICT.value());
+        return createExceptionDTO(e.getMessage(),
+                HttpStatus.CONFLICT.value());
     }
 
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(UserNotLoggedException.class)
     public ExceptionDTO handleUserNotLoggedException(Exception e) {
-        return createExceptionDTO(e.getMessage(), HttpStatus.UNAUTHORIZED.value());
+        return createExceptionDTO(e.getMessage(),
+                HttpStatus.UNAUTHORIZED.value());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -86,19 +93,21 @@ public abstract class AbstractController {
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     @ExceptionHandler(MethodNotAllowedException.class)
     public ExceptionDTO handleMethodNotAllowedException(Exception e) {
-        return createExceptionDTO(e.getMessage(), HttpStatus.METHOD_NOT_ALLOWED.value());
+        return createExceptionDTO(e.getMessage(),
+                HttpStatus.METHOD_NOT_ALLOWED.value());
     }
 
-    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(InvalidOperationException.class)
     public ExceptionDTO handleInvalidOperationException(Exception e) {
-        return createExceptionDTO(e.getMessage(), HttpStatus.FORBIDDEN.value());//TODO: Check the status
+        return createExceptionDTO(e.getMessage(),
+                HttpStatus.BAD_REQUEST.value());
     }
 
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(RessetPasswordException.class)
     public ExceptionDTO handleResetPasswordException(Exception e) {
-        return createExceptionDTO(e.getMessage(), HttpStatus.OK.value());
+        return createExceptionDTO(e.getMessage(), HttpStatus.NOT_FOUND.value());
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -110,14 +119,12 @@ public abstract class AbstractController {
     @ResponseStatus(HttpStatus.BAD_GATEWAY)
     @ExceptionHandler(value = {Exception.class})
     public void handleServerException(Exception e) {
-        createExceptionDTO(e.getMessage(), HttpStatus.BAD_GATEWAY.value());
         e.printStackTrace();
     }
 
     @ResponseStatus(HttpStatus.FAILED_DEPENDENCY)
     @ExceptionHandler(SQLException.class)
     public void handleSQLException(Exception e) {
-        createExceptionDTO(e.getMessage(), HttpStatus.FAILED_DEPENDENCY.value());
         e.printStackTrace();
     }
 

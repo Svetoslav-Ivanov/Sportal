@@ -2,12 +2,13 @@ package com.example.sportal.util.validators;
 
 import com.example.sportal.dto.article.NewArticleDTO;
 import com.example.sportal.model.exception.InvalidDataException;
+import com.example.sportal.model.exception.NotFoundException;
 import com.example.sportal.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ArticleValidator {
 
-    public static final int MIN_TITLE_LENGTH = 20;
+    public static final int MIN_TITLE_LENGTH = 10;
     public static final int MAX_TITLE_LENGTH = 200;
     public static final int MIN_TEXT_LENGTH = 200;
     public static final int MAX_TEXT_LENGTH = 20_000;
@@ -17,8 +18,7 @@ public class ArticleValidator {
 
     public boolean isValidDTO(NewArticleDTO dto) {
         return titleIsValid(dto.getTitle())
-                && textIsValid(dto.getText())
-                && categoryRepository.existsByName(dto.getCategoryName());
+                && textIsValid(dto.getText());
     }
 
     public boolean titleIsValid(String title) {

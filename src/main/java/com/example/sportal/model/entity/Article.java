@@ -5,16 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -31,25 +22,22 @@ public class Article {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
     private long id;
-    @OneToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(referencedColumnName = "id", nullable = false)
     private Category category;
     @Column(nullable = false)
     private String title;
     @Column(columnDefinition = "TEXT", nullable = false)
     private String text;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(referencedColumnName = "id", nullable = false)
     private User author;
     @Column
     private Date postDate;
-    @OneToMany(mappedBy = "article")
+    @OneToMany(mappedBy = "article",cascade = CascadeType.PERSIST)
     private List<Comment> comments;
     @Column(nullable = false)
     private int views = 0;
-    @Column
-    private int dailyViews;
-
-    // TODO: Images
-
+    @Column(nullable = false)
+    private Integer dailyViews = 0;
 }

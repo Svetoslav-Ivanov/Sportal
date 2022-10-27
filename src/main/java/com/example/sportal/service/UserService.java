@@ -15,6 +15,7 @@ import com.example.sportal.util.validators.UserValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.*;
@@ -25,7 +26,7 @@ public class UserService extends AbstractService {
     public static final int RESET_PASSWORD_DURATION = 20;
     public static final String RESET_PASSWORD_MESSAGE = "Check your email address. If it exist in our system, " +
             "you will receive a reset password link.";
-    private static final String HOST = "http://172.20.10.11:8080/users/reset?id=";
+    private static final String HOST = "http://172.20.10.11:8080/users/reset-password?id=";
     @Autowired
     private BCryptPasswordEncoder encoder;
     @Autowired
@@ -75,28 +76,30 @@ public class UserService extends AbstractService {
                 && userValidator.emailIsNotForeign(user, dto.getEmail())) {
             user.setEmail(dto.getEmail());
         }
-
-        if (userValidator.passwordsAreValid(dto.getNewPassword(), dto.getConfirmPassword())) {
-            if (encoder.matches(dto.getPassword(),user.getPassword())){
-                user.setPassword(encoder.encode(dto.getNewPassword()));
-            } else {
-                throw new AuthenticationException("Wrong credentials!");
+        if (dto.getPassword() != null || dto.getNewPassword() != null || dto.getConfirmPassword() != null) {
+            if (userValidator.passwordsAreValid(dto.getNewPassword(), dto.getConfirmPassword())) {
+                if (encoder.matches(dto.getPassword(), user.getPassword())) {
+                    user.setPassword(encoder.encode(dto.getNewPassword()));
+                } else {
+                    throw new AuthenticationException("Wrong credentials!");
+                }
             }
         }
+        user.setAdmin(dto.isAdmin());
         userRepository.save(user);
         return modelMapper.map(user, UserWithoutPasswordAndActiveAndAdminDTO.class);
     }
 
-    public boolean delete(long id) {
-        User u = getUserById(id);
+    public UserWithoutPasswordAndActiveAndAdminDTO delete(long id) {
+        User user = getUserById(id);
         String deletedAt = "Deleted at " + Calendar.getInstance().getTime();
-        u.setActive(false);
-        u.setAdmin(false);
-        u.setUsername(deletedAt);
-        u.setEmail(deletedAt);
-        u.setPassword(deletedAt);
-        userRepository.save(u);
-        return true;
+        user.setActive(false);
+        user.setAdmin(false);
+        user.setUsername(deletedAt);
+        user.setEmail(deletedAt);
+        user.setPassword(deletedAt);
+        userRepository.save(user);
+        return modelMapper.map(user, UserWithoutPasswordAndActiveAndAdminDTO.class);
     }
 
     public UserWithoutPasswordAndActiveAndAdminDTO login(UserLoginDTO dto) {
@@ -109,6 +112,7 @@ public class UserService extends AbstractService {
         return modelMapper.map(user, UserWithoutPasswordAndActiveAndAdminDTO.class);
     }
 
+    @Transactional
     public boolean requestResetPassword(String email) {
         Optional<User> user = userRepository.findUserByEmail(email);
 
@@ -126,7 +130,7 @@ public class UserService extends AbstractService {
         String text = "Hello dear " + user.get().getUsername() + ",\n\n" +
                 "Please follow the link to reset your password:\n" +
                 URL + "\n\n" +
-                "The link will expire in 20 minutes, or when your password is reset." + "\n\n\n" +
+                "This link expires in 20 minutes, or when your password is reset." + "\n\n\n" +
                 "Best regards,\n" +
                 "Sportal team";
         String subject = "Sportal - Password recovery link";
@@ -135,23 +139,20 @@ public class UserService extends AbstractService {
         return true;
     }
 
+    @Transactional
     public boolean resetPassword(String URI, UserChangePasswordDTO dto) {
-        Optional<ResetPasswordLink> link = resetPasswordLinkRepository.findById(URI);
-        if (link.isEmpty()) {
-            throw new NotFoundException("Page not found!");
-        }
-        ResetPasswordLink resetPasswordLink = link.get();
-        if (resetPasswordLink.getExpiresAt().after(Calendar.getInstance().getTime())) {
+        ResetPasswordLink link = resetPasswordLinkRepository.findById(URI)
+                .orElseThrow(() -> new NotFoundException("Link not found!"));
+        if (link.getExpiresAt().after(Calendar.getInstance().getTime())) {
             throw new NotFoundException("This link has been expired!");
         }
         if (!userValidator.passwordsAreValid(dto.getPassword(), dto.getConfirmPassword())) {
             throw new InvalidDataException("This password doesn`t meet our requirements!");
         }
-        User user = resetPasswordLink.getIntendedFor();
+        User user = link.getIntendedFor();
         user.setPassword(encoder.encode(dto.getPassword()));
-        resetPasswordLinkRepository.delete(resetPasswordLink);
+        resetPasswordLinkRepository.delete(link);
         userRepository.save(user);
-        resetPasswordLinkRepository.delete(link.get());
         return true;
     }
 

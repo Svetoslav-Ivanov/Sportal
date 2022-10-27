@@ -12,10 +12,12 @@ import java.util.Optional;
 @Repository
 public interface ArticleRepository extends JpaRepository<Article, Long> {
 
-    @Query(value = "SELECT * FROM articles ORDER BY daily_views DESC LIMIT 5",
+    @Query(value = "SELECT * FROM articles ORDER BY daily_views DESC LIMIT 5;",
             nativeQuery = true)
         //TODO: TEST
     Optional<List<Article>> findAllOrderByDailyViewsDesc();
 
     Optional<List<Article>> findAllByCategoryName(String categoryName);
+
+    Optional<List<Article>> findAllByCategoryId(long categoryId);
 }

@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -16,21 +17,28 @@ import java.util.List;
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
     @Column(nullable = false)
     private String text;
     @Column(nullable = false)
     private Date postDate;
-    @ManyToOne
-    @JoinColumn(referencedColumnName = "id", nullable = false)
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(referencedColumnName = "id")
     private Article article;
-    @ManyToOne
-    @JoinColumn(name = "author_id", nullable = false)
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "author_id")
     private User author;
-    @OneToMany//TODO
-    private List<Comment> answers;
-    @ManyToMany(mappedBy = "likes")
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "parent_id", referencedColumnName = "id")
+    private Comment parent;
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.PERSIST)
+    private List<Comment> answers = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "likes", cascade = CascadeType.PERSIST)
     private List<User> likedBy;
-    @ManyToMany(mappedBy = "dislikes")
+    @ManyToMany(mappedBy = "dislikes", cascade = CascadeType.PERSIST)
     private List<User> dislikedBy;
+
 }

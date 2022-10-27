@@ -22,13 +22,10 @@ public abstract class AbstractService {
     protected UserRepository userRepository;
     @Autowired
     protected CommentRepository commentRepository;
-
     @Autowired
     protected ModelMapper modelMapper;
-
     @Autowired
     protected ArticleRepository articleRepository;
-
     @Autowired
     protected CategoryRepository categoryRepository;
     @Autowired
@@ -61,5 +58,10 @@ public abstract class AbstractService {
                 .orElseThrow(() -> new NotFoundException("Category not found!"));
     }
 
+    protected Category getCategoryByName(String name) {
+        return categoryRepository
+                .findByName(name)
+                .orElseThrow(() -> new NotFoundException("Category not found!"));
+    }
 
 }

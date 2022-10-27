@@ -1,7 +1,9 @@
 package com.example.sportal.controller;
 
+import com.example.sportal.dto.article.ArticleDTO;
 import com.example.sportal.dto.category.CategoryDTO;
 
+import com.example.sportal.dto.category.CreateCategoryDTO;
 import com.example.sportal.model.entity.Category;
 import com.example.sportal.model.exception.MethodNotAllowedException;
 import com.example.sportal.model.exception.NotFoundException;
@@ -40,22 +42,18 @@ public class CategoryController extends AbstractController {
 
     @PostMapping()
     @ResponseStatus(code = HttpStatus.CREATED)
-    public CategoryDTO createCategory(@RequestBody Category category, HttpSession session) {
+    public CategoryDTO createCategory(@RequestBody CreateCategoryDTO dto, HttpSession session) {
         if (isAdmin(session)) {
-            return categoryService.createCategory(category);
+            return categoryService.createCategory(dto);
         }
         throw new MethodNotAllowedException("You don`t have permission to do this action!");
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(code = HttpStatus.OK)
-    public String deleteCategory(@PathVariable long id, HttpSession session) {
+    public CategoryDTO deleteCategory(@PathVariable long id, HttpSession session) {
         if (isAdmin(session)) {
-            if (categoryService.deleteCategory(id)){
-                return "Category deleted successfully";
-            } else {
-                throw new NotFoundException("Category not found");
-            }
+            return categoryService.deleteCategory(id);
         }
         throw new MethodNotAllowedException("You don`t have permission to do this action!");
     }

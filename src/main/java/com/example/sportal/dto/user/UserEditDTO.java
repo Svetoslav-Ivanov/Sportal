@@ -12,4 +12,5 @@ import lombok.Setter;
 public class UserEditDTO extends UserRegisterDTO {
     @JsonProperty("new-password")
     private String newPassword;
+    private boolean admin;
 }

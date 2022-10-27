@@ -10,8 +10,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class NewArticleDTO {
-    @JsonProperty("category-name")
-    private String categoryName;
+    @JsonProperty("category-id")
+    private int categoryId;
     private String title;
     private String text;
     private Image image;

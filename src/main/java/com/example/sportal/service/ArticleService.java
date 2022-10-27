@@ -4,6 +4,7 @@ import com.example.sportal.dto.article.ArticleDTO;
 import com.example.sportal.dto.article.EditArticleDTO;
 import com.example.sportal.dto.article.NewArticleDTO;
 import com.example.sportal.model.entity.Article;
+import com.example.sportal.model.exception.InvalidDataException;
 import com.example.sportal.model.exception.NotFoundException;
 import com.example.sportal.repository.CategoryRepository;
 
@@ -31,6 +32,7 @@ public class ArticleService extends AbstractService {
     public ArticleDTO getById(long id) {
         Article article = getArticleById(id);
         article.setViews(article.getViews() + 1);
+        article.setDailyViews(article.getDailyViews() + 1);
         articleRepository.save(article);
         return modelMapper.map(article, ArticleDTO.class);
     }
@@ -55,22 +57,26 @@ public class ArticleService extends AbstractService {
                 .collect(Collectors.toList());
     }
 
-    public boolean deleteById(long id) {
+    public ArticleDTO deleteById(long id) {
         Article article = getArticleById(id);
+        ArticleDTO dto = modelMapper.map(article, ArticleDTO.class);
+        article.getAuthor().getArticles().remove(article);
         articleRepository.delete(article);
-        return true;
+        return dto;
     }
 
     public ArticleDTO createArticle(NewArticleDTO dto, long authorId) {
-        Article article = modelMapper.map(dto, Article.class);
-        if (articleValidator.isValidDTO(dto)) {
+        if (articleValidator.isValidDTO(dto)) { // TODO: Check for existing title
+            Article article = modelMapper.map(dto, Article.class);
             article.setPostDate(Calendar.getInstance().getTime());
             article.setAuthor(getUserById(authorId));
+            article.setDailyViews(0);
+            article.setCategory(getCategoryById(dto.getCategoryId()));
             //TODO: images
             articleRepository.save(article);
             return modelMapper.map(article, ArticleDTO.class);
         }
-        return null;
+        throw new InvalidDataException("Invalid data given! ");
     }
 
     public ArticleDTO editArticle(EditArticleDTO dto) {
@@ -78,11 +84,32 @@ public class ArticleService extends AbstractService {
         if (articleValidator.isValidDTO(dto)) {
             article.setTitle(dto.getTitle());
             article.setText(dto.getText());
-            article.setCategory(categoryRepository.getByName(dto.getCategoryName()));
+            article.setCategory(categoryRepository.getById(dto.getCategoryId()));
             //TODO: images
             articleRepository.save(article);
             return modelMapper.map(article, ArticleDTO.class);
         }
         return null;
+    }
+
+    public List<ArticleDTO> getAllByCategoryId(long categoryId) {
+        if (!categoryRepository.existsById(categoryId)) {
+            throw new NotFoundException("Category not found!");
+        }
+        List<Article> articles = articleRepository
+                .findAllByCategoryId(categoryId)
+                .orElseThrow(() -> new NotFoundException("No articles"));
+        return articles
+                .stream()
+                .map(a -> modelMapper.map(a, ArticleDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    public void clearDailyViews() {
+        List<Article> articles = articleRepository.findAll();
+        articles.forEach(a -> {
+            a.setViews(0);
+            articleRepository.save(a);
+        });
     }
 }

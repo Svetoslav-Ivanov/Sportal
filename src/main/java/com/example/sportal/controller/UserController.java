@@ -20,9 +20,9 @@ public class UserController extends AbstractController {
     @Autowired
     private ResetPasswordLinkService resetPasswordLinkService;
 
-    @GetMapping("/{uid}")
-    public UserWithoutPasswordAndActiveAndAdminDTO getById(@PathVariable long uid) {
-        return userService.getById(uid);
+    @GetMapping("/{userId}")
+    public UserWithoutPasswordAndActiveAndAdminDTO getById(@PathVariable long userId) {
+        return userService.getById(userId);
     }
 
     @PostMapping("/singup")
@@ -61,27 +61,29 @@ public class UserController extends AbstractController {
         throw new UserNotLoggedException("You are not logged yet!");
     }
 
-    @PutMapping("/{uid}")
-    public UserWithoutPasswordAndActiveAndAdminDTO editUser(@PathVariable long uid, @RequestBody UserEditDTO dto, HttpServletRequest request) {
+    @PutMapping("/{userId}")
+    public UserWithoutPasswordAndActiveAndAdminDTO editUser(@PathVariable long userId, @RequestBody UserEditDTO dto, HttpServletRequest request) {
         long loggedUserId = getLoggedUserId(request);
-        if (uid == loggedUserId || isAdmin(request.getSession())) {
-            return userService.edit(uid, dto);
+        boolean isAdmin = isAdmin(request.getSession());
+        if (userId == loggedUserId || isAdmin) {
+            if (dto.isAdmin()) {
+                if (!isAdmin){
+                    throw new InvalidOperationException("You don`t have permission to do this action!");
+                }
+            }
+            return userService.edit(userId, dto);
         }
         throw new MethodNotAllowedException("You don`t have permission to do this action!");
     }
 
-    @DeleteMapping("/{uid}") // TODO: Ask
-    public String deleteUser(@PathVariable long uid, HttpServletRequest request) {
+    @DeleteMapping("/{userId}") // TODO: Ask
+    public UserWithoutPasswordAndActiveAndAdminDTO deleteUser(@PathVariable long userId, HttpServletRequest request) {
         long loggedUserId = getLoggedUserId(request);
-        if (uid == loggedUserId || isAdmin(request.getSession())) {
-            if (userService.delete(uid)) {
-                if (uid == loggedUserId) {
-                    request.getSession().invalidate();
-                }
-                return "Profile deleted successfully!";
-            } else {
-                throw new NotFoundException("User not found");
+        if (userId == loggedUserId || isAdmin(request.getSession())) {
+            if (userId == loggedUserId) {
+                request.getSession().invalidate();
             }
+            return userService.delete(userId);
         }
         throw new MethodNotAllowedException("You don`t have permission to do this action!");
     }
@@ -98,7 +100,7 @@ public class UserController extends AbstractController {
         return RESET_PASSWORD_MESSAGE;
     }
 
-    @PutMapping("/reset-password") // TODO:TEST
+    @PutMapping("/reset-password")
     public String resetPassword(@RequestParam("id") String id, @RequestBody UserChangePasswordDTO dto) {
         if (!resetPasswordLinkService.existsById(id)) {
             throw new NotFoundException("Link not found!");

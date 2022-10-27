@@ -5,9 +5,7 @@ import com.example.sportal.model.entity.Article;
 import com.example.sportal.model.entity.Comment;
 import com.example.sportal.model.entity.User;
 import com.example.sportal.model.exception.*;
-import com.example.sportal.repository.ArticleRepository;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -21,9 +19,9 @@ public class CommentService extends AbstractService {
         return modelMapper.map(getCommentById(commentId), CommentDTO.class);
     }
 
-    public CommentDTO editComment(EditCommentDTO dto) {
-        Comment comment = getCommentById(dto.getId());
-        if (textIdValid(dto.getText())) {
+    public CommentDTO editComment(long commentId, NewCommentDTO dto) {
+        Comment comment = getCommentById(commentId);
+        if (textIsValid(dto.getText())) {
             comment.setText(dto.getText());
             commentRepository.save(comment);
             return modelMapper.map(comment, CommentDTO.class);
@@ -41,8 +39,11 @@ public class CommentService extends AbstractService {
                 .collect(Collectors.toList());
     }
 
-    public CommentDTO commentArticle(CommentArticleDTO dto, long authorId) {
-        if (textIdValid(dto.getText())) {
+    public CommentDTO create(CommentArticleDTO dto, long authorId) {
+        if (dto.getText() == null || dto.getText().isBlank()) {
+            throw new InvalidDataException("Invalid comment text!");
+        }
+        if (textIsValid(dto.getText())) {
             Comment comment = new Comment();
             Article article = getArticleById(dto.getArticleId());
             User author = getUserById(authorId);
@@ -56,7 +57,7 @@ public class CommentService extends AbstractService {
         throw new InvalidDataException("Invalid data given!");
     }
 
-    private boolean textIdValid(String text) {
+    private boolean textIsValid(String text) {
         if (text != null && !text.isBlank() && text.length() <= MAX_COMMENT_LENGTH) {
             return true;
         }
@@ -64,23 +65,40 @@ public class CommentService extends AbstractService {
     }
 
     public CommentDTO answerComment(long parentId, long authorId, NewCommentDTO dto) {
-        if (textIdValid(dto.getText())) {
+        if (textIsValid(dto.getText())) {
             Comment parent = getCommentById(parentId);
             Comment child = modelMapper.map(dto, Comment.class);
+            User author = getUserById(authorId);
             child.setPostDate(Calendar.getInstance().getTime());
+            child.setAuthor(author);
+            child.setArticle(parent.getArticle());
+            child.setParent(parent);
             parent.getAnswers().add(child);
-            commentRepository.save(child);
+            commentRepository.save(child); // TODO: ASK
             commentRepository.save(parent);
             return modelMapper.map(child, CommentDTO.class);
         }
         throw new BadRequestException("This action cannot be completed!");
     }
 
-    public boolean deleteComment(long commentId) {
+    public CommentDTO deleteComment(long commentId, long userId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException("Comment not found!"));
-        commentRepository.delete(comment);
-        return true;
+        if (isOwner(commentId, userId) || getUserById(userId).isAdmin()) {
+            CommentDTO dto = modelMapper.map(comment, CommentDTO.class);
+            if (comment.getParent() != null) {
+                comment.getParent().getAnswers().remove(comment);
+            }
+            if (comment.getLikedBy() != null){
+                comment.getLikedBy().forEach(u -> u.getLikes().remove(comment));
+            }
+            if (comment.getDislikedBy() != null) {
+                comment.getDislikedBy().forEach(u -> u.getDislikes().remove(comment));
+            }
+            commentRepository.delete(comment);
+            return dto;
+        }
+        throw new MethodNotAllowedException("You don`t have permission to do this action!");
     }
 
     public int likeComment(long commentId, long userId) {
@@ -106,11 +124,11 @@ public class CommentService extends AbstractService {
             user.getDislikes().add(comment);
         }
         commentRepository.save(comment);
-        return comment.getLikedBy().size();
+        return comment.getDislikedBy().size();
     }
 
     public boolean isOwner(long commentId, long userId) {
-        Comment comment = commentRepository.findCommentById(commentId).orElseThrow(() -> new NotFoundException("User not found"));
+        Comment comment = commentRepository.findCommentById(commentId).orElseThrow(() -> new NotFoundException("Comment not found"));
         return comment.getAuthor().getId() == userId;
     }
 
