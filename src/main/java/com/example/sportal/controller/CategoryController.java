@@ -1,12 +1,9 @@
 package com.example.sportal.controller;
 
-import com.example.sportal.dto.article.ArticleDTO;
 import com.example.sportal.dto.category.CategoryDTO;
 
 import com.example.sportal.dto.category.CreateCategoryDTO;
-import com.example.sportal.model.entity.Category;
 import com.example.sportal.model.exception.MethodNotAllowedException;
-import com.example.sportal.model.exception.NotFoundException;
 import com.example.sportal.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.List;
 

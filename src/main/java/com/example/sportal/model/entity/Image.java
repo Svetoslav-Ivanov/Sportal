@@ -6,22 +6,21 @@ import lombok.Setter;
 
 import javax.persistence.*;
 
-
+@Entity
 @Getter
 @Setter
 @NoArgsConstructor
-@Entity
-@Table(name = "images")
 public class Image {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private long id;
-    @Column(name = "URL", nullable = false)
-    private String URL;
+    @Column(name = "id", nullable = false)
+    private Long id;
+    private String URI;
     @ManyToOne(cascade = CascadeType.PERSIST)
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "article")
     private Article article;
 
+    public Image (String URI){
+        this.URI = URI;
+    }
 }

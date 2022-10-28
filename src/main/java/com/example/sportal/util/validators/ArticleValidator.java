@@ -3,9 +3,7 @@ package com.example.sportal.util.validators;
 import com.example.sportal.dto.article.NewArticleDTO;
 import com.example.sportal.model.exception.DataAlreadyExistException;
 import com.example.sportal.model.exception.InvalidDataException;
-import com.example.sportal.model.exception.NotFoundException;
 import com.example.sportal.repository.ArticleRepository;
-import com.example.sportal.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ArticleValidator {
@@ -18,12 +16,12 @@ public class ArticleValidator {
     @Autowired
     private ArticleRepository articleRepository;
 
-    public boolean isValidDTO(NewArticleDTO dto) {
-        if (articleRepository.existsByTitle(dto.getTitle())){
+    public boolean titleAndTextAreValid(String titlle, String text) {
+        if (articleRepository.existsByTitle(titlle)){
             throw new DataAlreadyExistException("This title already exists!");
         }
-        return titleIsValid(dto.getTitle())
-                && textIsValid(dto.getText());
+        return titleIsValid(titlle)
+                && textIsValid(text);
     }
 
     public boolean titleIsValid(String title) {

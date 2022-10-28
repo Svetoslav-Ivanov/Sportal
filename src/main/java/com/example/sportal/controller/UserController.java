@@ -36,16 +36,16 @@ public class UserController extends AbstractController {
         if (session.getAttribute(USER_ID) != null) {
             throw new InvalidOperationException("You are already logged in!");
         }
-        UserWithoutPasswordAndActiveAndAdminDTO loggedDto = userService.login(dto);
-        if (loggedDto != null) {
+        UserWithoutPasswordAndActiveAndAdminDTO loggedUserDto = userService.login(dto);
+        if (loggedUserDto != null) {
             session.setAttribute(REMOTE_ADDRESS, request.getRemoteAddr());
-            session.setAttribute(USER_ID, loggedDto.getId());
-            if (userService.isAdmin(loggedDto.getId())) {
+            session.setAttribute(USER_ID, loggedUserDto.getId());
+            if (userService.isAdmin(loggedUserDto.getId())) {
                 session.setAttribute(IS_ADMIN, TRUE);
             } else {
                 session.setAttribute(IS_ADMIN, FALSE);
             }
-            return loggedDto;
+            return loggedUserDto;
         }
         throw new AuthenticationException("Wrong credentials!");
     }
@@ -74,7 +74,7 @@ public class UserController extends AbstractController {
         throw new MethodNotAllowedException("You don`t have permission to do this action!");
     }
 
-    @DeleteMapping("/{userId}") // TODO: Ask
+    @DeleteMapping("/{userId}")
     public UserWithoutPasswordAndActiveAndAdminDTO deleteUser(@PathVariable long userId, HttpServletRequest request) {
         long loggedUserId = getLoggedUserId(request);
         if (userId == loggedUserId || isAdmin(request.getSession())) {
