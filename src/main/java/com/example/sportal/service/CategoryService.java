@@ -11,6 +11,7 @@ import org.modelmapper.ModelMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,14 +19,10 @@ import java.util.stream.Collectors;
 
 @Service
 public class CategoryService extends AbstractService {
-    private final CategoryRepository categoryRepository;
-    private final ModelMapper modelMapper;
-
     @Autowired
-    public CategoryService(CategoryRepository categoryRepository, ModelMapper modelMapper) {
-        this.categoryRepository = categoryRepository;
-        this.modelMapper = modelMapper;
-    }
+    private CategoryRepository categoryRepository;
+    @Autowired
+    private ModelMapper modelMapper;
 
     public List<CategoryDTO> getAllCategories() {
         return categoryRepository.findAll()
@@ -46,11 +43,10 @@ public class CategoryService extends AbstractService {
         return modelMapper.map(category, CategoryDTO.class);
     }
 
+    @Transactional
     public CategoryDTO deleteCategory(long id) {
         Category category = getCategoryById(id);
         CategoryDTO dto = modelMapper.map(category, CategoryDTO.class);
-//        Optional<List<Article>> articles = articleRepository.findAllByCategoryId(id);
-//        articles.ifPresent(articleList -> articleRepository.deleteAll(articleList));
         categoryRepository.delete(category);
         return dto;
     }

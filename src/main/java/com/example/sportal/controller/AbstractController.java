@@ -3,6 +3,7 @@ package com.example.sportal.controller;
 import com.example.sportal.dto.ExceptionDTO;
 import com.example.sportal.model.exception.*;
 import com.example.sportal.service.ArticleService;
+import com.example.sportal.service.ResetPasswordLinkService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -25,6 +26,8 @@ public abstract class AbstractController {
 
     @Autowired
     protected ArticleService articleService;
+    @Autowired
+    protected ResetPasswordLinkService resetPasswordLinkService;
 
     public long getLoggedUserId(HttpServletRequest request) {
         HttpSession session = request.getSession();
@@ -135,6 +138,5 @@ public abstract class AbstractController {
         dto.setDateTime(LocalDateTime.now());
         return dto;
     }
-
 
 }

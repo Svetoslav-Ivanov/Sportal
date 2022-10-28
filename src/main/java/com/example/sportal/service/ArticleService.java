@@ -14,6 +14,7 @@ import org.modelmapper.ModelMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Calendar;
 import java.util.List;
@@ -21,7 +22,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class ArticleService extends AbstractService {
-    //TODO: Refactor
     @Autowired
     private CategoryRepository categoryRepository;
     @Autowired
@@ -30,6 +30,7 @@ public class ArticleService extends AbstractService {
     private ArticleValidator articleValidator;
 
 
+    @Transactional
     public ArticleDTO getById(long id) {
         Article article = getArticleById(id);
         article.setViews(article.getViews() + 1);
@@ -48,6 +49,7 @@ public class ArticleService extends AbstractService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public ArticleDTO deleteById(long id) {
         Article article = getArticleById(id);
         ArticleDTO dto = modelMapper.map(article, ArticleDTO.class);
@@ -72,6 +74,7 @@ public class ArticleService extends AbstractService {
         throw new InvalidDataException("Invalid data given! ");
     }
 
+    @Transactional
     public ArticleDTO editArticle(EditArticleDTO dto) {
         Article article = getArticleById(dto.getArticleId());
         if (articleValidator.isValidDTO(dto)) {
@@ -98,6 +101,7 @@ public class ArticleService extends AbstractService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public void clearDailyViews() {
         List<Article> articles = articleRepository.findAll();
         articles.forEach(a -> {
@@ -107,7 +111,8 @@ public class ArticleService extends AbstractService {
     }
 
     public List<ArticleDTO> searchByTitle(SearchArticleDTO dto) {
-        List<Article> articles = articleRepository.findAllByTitleContainingIgnoreCaseOrTextContainingIgnoreCase(dto.getTitle(),dto.getTitle());
+        List<Article> articles = articleRepository
+                .findAllByTitleContainingIgnoreCaseOrTextContainingIgnoreCase(dto.getTitle(),dto.getTitle());
         if (articles.size() > 0) {
             return articles
                     .stream()

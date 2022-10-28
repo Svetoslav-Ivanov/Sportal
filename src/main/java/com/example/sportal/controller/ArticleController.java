@@ -6,7 +6,6 @@ import com.example.sportal.dto.article.EditArticleDTO;
 import com.example.sportal.dto.article.NewArticleDTO;
 import com.example.sportal.dto.article.SearchArticleDTO;
 import com.example.sportal.model.exception.MethodNotAllowedException;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -74,7 +73,8 @@ public class ArticleController extends AbstractController {
 
 
     @Scheduled(cron = "0 0 0 * * *")
-    public void clearDailyViews() {
+    public void prepareDB() {
         articleService.clearDailyViews();
+        resetPasswordLinkService.clearExpiredLinks();
     }
 }

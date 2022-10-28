@@ -7,6 +7,7 @@ import com.example.sportal.model.entity.User;
 import com.example.sportal.model.exception.*;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,6 +20,7 @@ public class CommentService extends AbstractService {
         return modelMapper.map(getCommentById(commentId), CommentDTO.class);
     }
 
+    @Transactional
     public CommentDTO editComment(long commentId, NewCommentDTO dto) {
         Comment comment = getCommentById(commentId);
         if (textIsValid(dto.getText())) {
@@ -39,6 +41,7 @@ public class CommentService extends AbstractService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public CommentDTO create(CommentArticleDTO dto, long authorId) {
         if (dto.getText() == null || dto.getText().isBlank()) {
             throw new InvalidDataException("Invalid comment text!");
@@ -57,13 +60,7 @@ public class CommentService extends AbstractService {
         throw new InvalidDataException("Invalid data given!");
     }
 
-    private boolean textIsValid(String text) {
-        if (text != null && !text.isBlank() && text.length() <= MAX_COMMENT_LENGTH) {
-            return true;
-        }
-        throw new InvalidDataException("Invalid text!");
-    }
-
+    @Transactional
     public CommentDTO answerComment(long parentId, long authorId, NewCommentDTO dto) {
         if (textIsValid(dto.getText())) {
             Comment parent = getCommentById(parentId);
@@ -81,6 +78,7 @@ public class CommentService extends AbstractService {
         throw new BadRequestException("This action cannot be completed!");
     }
 
+    @Transactional
     public CommentDTO deleteComment(long commentId, long userId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException("Comment not found!"));
@@ -101,6 +99,7 @@ public class CommentService extends AbstractService {
         throw new MethodNotAllowedException("You don`t have permission to do this action!");
     }
 
+    @Transactional
     public int likeComment(long commentId, long userId) {
         Comment comment = getCommentById(commentId);
         User user = getUserById(userId);
@@ -114,6 +113,7 @@ public class CommentService extends AbstractService {
         return comment.getLikedBy().size();
     }
 
+    @Transactional
     public int dislikeComment(long userId, long commentId) {
         Comment comment = getCommentById(commentId);
         User user = getUserById(userId);
@@ -132,4 +132,11 @@ public class CommentService extends AbstractService {
         return comment.getAuthor().getId() == userId;
     }
 
+
+    private boolean textIsValid(String text) {
+        if (text != null && !text.isBlank() && text.length() <= MAX_COMMENT_LENGTH) {
+            return true;
+        }
+        throw new InvalidDataException("Invalid text!");
+    }
 }

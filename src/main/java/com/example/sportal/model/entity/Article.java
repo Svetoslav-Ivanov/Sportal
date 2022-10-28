@@ -15,7 +15,7 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@Table(name = "articles")
+@Table(name = "articles", indexes = @Index(name = "titleAndTextIndex", columnList = "title, text"))
 public class Article {
 
     @Id
@@ -34,7 +34,7 @@ public class Article {
     private User author;
     @Column
     private Date postDate;
-    @OneToMany(mappedBy = "article",cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "article", cascade = CascadeType.PERSIST)
     private List<Comment> comments;
     @Column(nullable = false)
     private int views = 0;

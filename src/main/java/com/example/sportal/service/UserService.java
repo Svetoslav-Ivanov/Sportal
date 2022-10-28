@@ -66,6 +66,7 @@ public class UserService extends AbstractService {
         return modelMapper.map(user, UserWithoutPasswordAndActiveAndAdminDTO.class);
     }
 
+    @Transactional
     public UserWithoutPasswordAndActiveAndAdminDTO edit(long userId, @RequestBody UserEditDTO dto) {
         User user = getUserById(userId);
         if (userValidator.usernameIsValid(dto.getUsername())
@@ -90,6 +91,7 @@ public class UserService extends AbstractService {
         return modelMapper.map(user, UserWithoutPasswordAndActiveAndAdminDTO.class);
     }
 
+    @Transactional
     public UserWithoutPasswordAndActiveAndAdminDTO delete(long id) {
         User user = getUserById(id);
         String deletedAt = "Deleted at " + Calendar.getInstance().getTime();
@@ -156,23 +158,17 @@ public class UserService extends AbstractService {
         return true;
     }
 
-    private String createRandomURI() {
-        StringBuilder URI = new StringBuilder();
-        for (int i = 0; i < 6; i++) {
-            URI.append(new Random().nextInt(10));
-        }
-        return encoder.encode(URI);
-    }
-
     public boolean isAdmin(long id) {
         User u = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found!"));
         return u.isAdmin();
     }
 
-    public UserWithoutPasswordAndActiveAndAdminDTO getUserByUsername(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new NotFoundException("User with this username doesn`t exist!!"));
-        return modelMapper.map(user, UserWithoutPasswordAndActiveAndAdminDTO.class);
+    private String createRandomURI() {
+        StringBuilder URI = new StringBuilder();
+        for (int i = 0; i < 6; i++) {
+            URI.append(new Random().nextInt(10));
+        }
+        return encoder.encode(URI);
     }
 }

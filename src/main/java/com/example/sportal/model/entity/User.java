@@ -11,7 +11,7 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@Table(name = "users")
+@Table(name = "users", indexes = @Index(name = "usernameAndEmailIndex", columnList = "username, email"))
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

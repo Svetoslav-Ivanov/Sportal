@@ -17,8 +17,6 @@ import static com.example.sportal.service.UserService.RESET_PASSWORD_MESSAGE;
 public class UserController extends AbstractController {
     @Autowired
     private UserService userService;
-    @Autowired
-    private ResetPasswordLinkService resetPasswordLinkService;
 
     @GetMapping("/{userId}")
     public UserWithoutPasswordAndActiveAndAdminDTO getById(@PathVariable long userId) {
