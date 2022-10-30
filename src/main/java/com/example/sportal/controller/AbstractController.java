@@ -2,8 +2,8 @@ package com.example.sportal.controller;
 
 import com.example.sportal.dto.ExceptionDTO;
 import com.example.sportal.model.exception.*;
-import com.example.sportal.service.ArticleService;
 import com.example.sportal.service.ResetPasswordLinkService;
+import com.example.sportal.service.ArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -88,7 +88,7 @@ public abstract class AbstractController {
     @ExceptionHandler(InvalidDataException.class)
     public ExceptionDTO handleInvalidDataException(Exception e) {
         return createExceptionDTO("Invalid data given!" + e.getMessage(),
-                HttpStatus.BAD_REQUEST.value());// Todo: Check status
+                HttpStatus.BAD_REQUEST.value());
     }
 
 

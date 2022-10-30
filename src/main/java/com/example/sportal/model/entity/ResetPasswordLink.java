@@ -5,11 +5,13 @@ import lombok.*;
 import javax.persistence.*;
 import java.util.Calendar;
 
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "reset_password_links")
 @Getter
 @Setter
-@NoArgsConstructor
 public class ResetPasswordLink {
     @Id
     private String URI;

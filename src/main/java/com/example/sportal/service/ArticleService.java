@@ -1,11 +1,8 @@
 package com.example.sportal.service;
 
 import com.example.sportal.dto.article.ArticleDTO;
-import com.example.sportal.dto.article.EditArticleDTO;
 import com.example.sportal.model.entity.Article;
 import com.example.sportal.model.entity.Image;
-
-import com.example.sportal.model.exception.BadRequestException;
 
 import com.example.sportal.model.exception.InvalidDataException;
 import com.example.sportal.model.exception.NotFoundException;

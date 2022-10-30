@@ -2,7 +2,6 @@ package com.example.sportal.controller;
 
 import com.example.sportal.dto.user.*;
 import com.example.sportal.model.exception.*;
-import com.example.sportal.service.ResetPasswordLinkService;
 import com.example.sportal.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -92,7 +91,7 @@ public class UserController extends AbstractController {
         if (session.getAttribute(USER_ID) != null) {
             throw new InvalidOperationException("To reset your password, you must be logged out!");
         }
-        if (!userService.requestResetPassword(dto.getEmail())) {
+        if (!userService.requestResetPassword(dto.getEmail().trim())) {
             throw new NotFoundException("User not found!");
         }
         return RESET_PASSWORD_MESSAGE;

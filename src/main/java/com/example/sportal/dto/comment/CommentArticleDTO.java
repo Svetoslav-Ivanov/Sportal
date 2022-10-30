@@ -9,6 +9,5 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class CommentArticleDTO extends NewCommentDTO {
-    @JsonProperty("article-id")
     protected long articleId;
 }

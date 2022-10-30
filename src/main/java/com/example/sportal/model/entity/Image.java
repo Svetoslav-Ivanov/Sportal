@@ -1,15 +1,15 @@
 package com.example.sportal.model.entity;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
 @Table(name = "images")
 public class Image {
     @Id
@@ -24,9 +24,5 @@ public class Image {
     public Image(String URI, Article article) {
         this.URI = URI;
         this.article = article;
-    }
-
-    public Image(String URI) {
-        this.URI = URI;
     }
 }

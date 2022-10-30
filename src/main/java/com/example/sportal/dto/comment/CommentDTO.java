@@ -14,14 +14,10 @@ import java.util.List;
 @NoArgsConstructor
 public class CommentDTO {
     protected long id;
-    @JsonProperty ("author-id")
     protected long authorId;
-    @JsonProperty ("article-id")
     protected long articleId;
     protected String text;
-    @JsonProperty ("liked-by")
     protected List<UserWithoutPasswordAndActiveAndAdminDTO> likedBy;
-    @JsonProperty ("disliked-by")
     protected List<UserWithoutPasswordAndActiveAndAdminDTO> dislikedBy;
     protected List<CommentDTO> answers;
 }

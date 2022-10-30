@@ -13,7 +13,6 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 public class NewArticleDTO {
-    @JsonProperty("category-id")
     private int categoryId;
     private String title;
     private String text;

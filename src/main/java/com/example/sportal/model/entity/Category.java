@@ -1,14 +1,14 @@
 package com.example.sportal.model.entity;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import java.util.List;
 
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Getter
 @Setter
 @Entity
@@ -23,4 +23,5 @@ public class Category {
     private String name;
     @OneToMany(mappedBy = "category", cascade = CascadeType.PERSIST)
     private List<Article> articles;
+
 }
