@@ -87,7 +87,7 @@ public class CommentService extends AbstractService {
             if (comment.getParent() != null) {
                 comment.getParent().getAnswers().remove(comment);
             }
-            if (comment.getLikedBy() != null){
+            if (comment.getLikedBy() != null) {
                 comment.getLikedBy().forEach(u -> u.getLikes().remove(comment));
             }
             if (comment.getDislikedBy() != null) {
@@ -99,31 +99,31 @@ public class CommentService extends AbstractService {
         throw new MethodNotAllowedException("You don`t have permission to do this action!");
     }
 
-    @Transactional
+    //TODO: Ask about transaction. When @Transactional is set, returned size is incorrect
     public int likeComment(long commentId, long userId) {
         Comment comment = getCommentById(commentId);
         User user = getUserById(userId);
         user.getDislikes().remove(comment);
-        if (user.getLikes().contains(comment)) {
-            user.getLikes().remove(comment);
+        List<Comment> likes = user.getLikes();
+        if (likes.contains(comment)) {
+            likes.remove(comment);
         } else {
-            user.getLikes().add(comment);
+            likes.add(comment);
         }
-        commentRepository.save(comment);
+        userRepository.save(user);
         return comment.getLikedBy().size();
     }
-
-    @Transactional
     public int dislikeComment(long userId, long commentId) {
         Comment comment = getCommentById(commentId);
         User user = getUserById(userId);
         user.getLikes().remove(comment);
-        if (user.getDislikes().contains(comment)) {
-            user.getDislikes().remove(comment);
+        List<Comment> dislikes = user.getDislikes();
+        if (dislikes.contains(comment)) {
+            dislikes.remove(comment);
         } else {
-            user.getDislikes().add(comment);
+            dislikes.add(comment);
         }
-        commentRepository.save(comment);
+        userRepository.save(user);
         return comment.getDislikedBy().size();
     }
 

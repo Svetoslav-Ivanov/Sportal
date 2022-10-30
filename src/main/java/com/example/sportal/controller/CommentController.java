@@ -44,7 +44,7 @@ public class CommentController extends AbstractController {
         throw new MethodNotAllowedException("You don`t have rights to edit this comment!");
     }
 
-    @GetMapping("/articles/{articleId}/comments") // TODO: ASK
+    @GetMapping("/articles/{articleId}/comments")
     public List<CommentDTO> getAllByArticleId(@PathVariable long articleId) {
         return commentService.getAllByArticleId(articleId);
     }

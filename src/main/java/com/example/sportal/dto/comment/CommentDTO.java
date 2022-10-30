@@ -13,6 +13,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 public class CommentDTO {
+    protected long id;
     @JsonProperty ("author-id")
     protected long authorId;
     @JsonProperty ("article-id")

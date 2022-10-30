@@ -56,7 +56,6 @@ public abstract class AbstractController {
         return session.getAttribute(IS_ADMIN) != null && session.getAttribute(IS_ADMIN).equals(TRUE);
     }
 
-    // TODO: Write messages
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(AuthenticationException.class)
     public ExceptionDTO handleAuthenticationException(Exception e) {

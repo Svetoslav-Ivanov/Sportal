@@ -10,6 +10,7 @@ import javax.persistence.*;
 @Getter
 @Setter
 @NoArgsConstructor
+@Table(name = "images")
 public class Image {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,7 +21,8 @@ public class Image {
     @JoinColumn(name = "article")
     private Article article;
 
-    public Image (String URI){
+    public Image (String URI, Article article){
         this.URI = URI;
+        this.article = article;
     }
 }

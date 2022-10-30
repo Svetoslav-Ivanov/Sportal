@@ -2,7 +2,6 @@ package com.example.sportal.service;
 
 import com.example.sportal.dto.category.CategoryDTO;
 import com.example.sportal.dto.category.CreateCategoryDTO;
-import com.example.sportal.model.entity.Article;
 import com.example.sportal.model.entity.Category;
 import com.example.sportal.model.exception.*;
 import com.example.sportal.repository.CategoryRepository;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,6 +45,10 @@ public class CategoryService extends AbstractService {
     public CategoryDTO deleteCategory(long id) {
         Category category = getCategoryById(id);
         CategoryDTO dto = modelMapper.map(category, CategoryDTO.class);
+        category.getArticles().forEach(a -> {
+            a.getImages().forEach(imageService::deleteImage);
+            articleRepository.delete(a);
+        });
         categoryRepository.delete(category);
         return dto;
     }

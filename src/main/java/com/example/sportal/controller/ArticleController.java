@@ -3,16 +3,21 @@ package com.example.sportal.controller;
 import com.example.sportal.dto.article.ArticleDTO;
 import com.example.sportal.dto.article.EditArticleDTO;
 
-import com.example.sportal.dto.article.NewArticleDTO;
 import com.example.sportal.model.exception.MethodNotAllowedException;
+import com.example.sportal.model.exception.NotFoundException;
+import lombok.SneakyThrows;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.nio.file.Files;
 import java.util.List;
+
+import static com.example.sportal.service.ArticleService.UPLOADS;
 
 @RestController()
 public class ArticleController extends AbstractController {
@@ -45,7 +50,7 @@ public class ArticleController extends AbstractController {
     public ArticleDTO createArticle(@RequestParam(value = "title") String title,
                                     @RequestParam(value = "text") String text,
                                     @RequestParam(value = "categoryId") long categoryId,
-                                    @RequestParam(value = "image") List<MultipartFile> images,
+                                    @RequestParam(value = "images") MultipartFile[] images,
                                     HttpServletRequest request) {
         long loggedAdminId = getLoggedAdminId(request);
         if (loggedAdminId != INVALID_USER_ID) {
@@ -54,11 +59,16 @@ public class ArticleController extends AbstractController {
         throw new MethodNotAllowedException("You don`t have permission to do this action!");
     }
 
-    @PutMapping("/articles")
-    public ArticleDTO edit(@RequestBody EditArticleDTO articleEditDTO, HttpServletRequest request) {
+    @PutMapping("/articles/{articleId}")
+    public ArticleDTO edit(@PathVariable long articleId,
+                           @RequestParam(value = "title") String title,
+                           @RequestParam(value = "text") String text,
+                           @RequestParam(value = "categoryId") long categoryId,
+                           @RequestParam(value = "images") MultipartFile[] images,
+                           HttpServletRequest request) {
         long loggedAdminId = getLoggedAdminId(request);
         if (loggedAdminId != INVALID_USER_ID) {
-            return articleService.editArticle(articleEditDTO);
+            return articleService.editArticle(articleId,title,text,categoryId,images);
         }
         throw new MethodNotAllowedException("You don`t have permission to do this action!");
     }

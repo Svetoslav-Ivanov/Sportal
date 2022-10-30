@@ -1,10 +1,13 @@
 package com.example.sportal.util.validators;
 
 import com.example.sportal.dto.article.NewArticleDTO;
+import com.example.sportal.model.entity.Article;
 import com.example.sportal.model.exception.DataAlreadyExistException;
 import com.example.sportal.model.exception.InvalidDataException;
 import com.example.sportal.repository.ArticleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Optional;
 
 public class ArticleValidator {
 
@@ -16,11 +19,23 @@ public class ArticleValidator {
     @Autowired
     private ArticleRepository articleRepository;
 
-    public boolean titleAndTextAreValid(String titlle, String text) {
-        if (articleRepository.existsByTitle(titlle)){
+    public boolean titleAndTextAreValid(String title, String text, long articleId) {
+        Article currentArticle = articleRepository.getById(articleId);
+        Optional<Article> existingByTitle = articleRepository.findByTitle(title);
+        if (existingByTitle.isPresent()) {
+            if (currentArticle.getId() != existingByTitle.get().getId()) {
+                throw new DataAlreadyExistException("This title already exists!");
+            }
+        }
+        return titleIsValid(title)
+                && textIsValid(text);
+    }
+
+    public boolean titleAndTextAreValid(String title, String text) {
+        if (articleRepository.existsByTitle(title)) {
             throw new DataAlreadyExistException("This title already exists!");
         }
-        return titleIsValid(titlle)
+        return titleIsValid(title)
                 && textIsValid(text);
     }
 
@@ -28,7 +43,7 @@ public class ArticleValidator {
         if (isEmpty(title)) {
             throw new InvalidDataException("Title cannot be empty!");
         }
-        if (title.length() < MIN_TITLE_LENGTH){
+        if (title.length() < MIN_TITLE_LENGTH) {
             throw new InvalidDataException("Title too short!");
         }
         if (title.length() > MAX_TITLE_LENGTH) {
@@ -41,7 +56,7 @@ public class ArticleValidator {
         if (isEmpty(text)) {
             throw new InvalidDataException("Text cannot be empty!");
         }
-        if (text.length() < MIN_TEXT_LENGTH){
+        if (text.length() < MIN_TEXT_LENGTH) {
             throw new InvalidDataException("Text too short!");
         }
         if (text.length() > MAX_TEXT_LENGTH) {

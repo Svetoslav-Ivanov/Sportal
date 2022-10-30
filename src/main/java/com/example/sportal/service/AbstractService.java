@@ -6,13 +6,9 @@ import com.example.sportal.model.entity.Comment;
 import com.example.sportal.model.entity.User;
 import com.example.sportal.model.exception.NotFoundException;
 import com.example.sportal.model.exception.AuthenticationException;
-import com.example.sportal.repository.ArticleRepository;
-import com.example.sportal.repository.CategoryRepository;
-import com.example.sportal.repository.CommentRepository;
-import com.example.sportal.repository.UserRepository;
+import com.example.sportal.repository.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 
@@ -29,7 +25,9 @@ public abstract class AbstractService {
     @Autowired
     protected CategoryRepository categoryRepository;
     @Autowired
-    protected JdbcTemplate jdbcTemplate;
+    protected ImageRepository imageRepository;
+    @Autowired
+    protected ImageService imageService;
 
     protected User getUserByUsernameOrEmail(String username, String email) {
         return userRepository

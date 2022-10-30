@@ -54,4 +54,5 @@ public class ApplicationBeenConfiguration {
     public ArticleValidator articleValidator() {
         return new ArticleValidator();
     }
+
 }
