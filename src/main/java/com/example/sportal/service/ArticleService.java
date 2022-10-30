@@ -4,7 +4,9 @@ import com.example.sportal.dto.article.ArticleDTO;
 import com.example.sportal.dto.article.EditArticleDTO;
 import com.example.sportal.model.entity.Article;
 import com.example.sportal.model.entity.Image;
+
 import com.example.sportal.model.exception.BadRequestException;
+
 import com.example.sportal.model.exception.InvalidDataException;
 import com.example.sportal.model.exception.NotFoundException;
 import com.example.sportal.model.exception.ServerException;
@@ -25,12 +27,14 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Optional;
+
 import java.util.stream.Collectors;
 
 @Service
 public class ArticleService extends AbstractService {
     public static final String UPLOADS = "uploads";
+    public static final String IMAGES = "images";
+
     @Autowired
     private CategoryRepository categoryRepository;
     @Autowired
@@ -76,6 +80,7 @@ public class ArticleService extends AbstractService {
         if (multipartFiles == null || multipartFiles.length == 0) {
             throw new InvalidDataException("The article must have at least one image!");
         }
+
         if (articleValidator.titleAndTextAreValid(title, text)) {
             Article article = new Article();
             article.setTitle(title);
@@ -104,15 +109,12 @@ public class ArticleService extends AbstractService {
             if (multipartFiles != null && multipartFiles.length > 0) {
                 article.getImages().forEach(imageService::deleteImage);
                 List<Image> images = createImages(multipartFiles, article);
-
                 article.setImages(images);
             } else {
                 throw new InvalidDataException("The article must have at least one image!");
             }
-            articleRepository.save(article);
-            return modelMapper.map(article, ArticleDTO.class);
         }
-        throw new BadRequestException("Editing filed");
+        return modelMapper.map(article, ArticleDTO.class);
     }
 
     public List<ArticleDTO> getAllByCategoryId(long categoryId) {

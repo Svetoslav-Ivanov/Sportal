@@ -1,23 +1,18 @@
 package com.example.sportal.controller;
 
 import com.example.sportal.dto.article.ArticleDTO;
-import com.example.sportal.dto.article.EditArticleDTO;
 
 import com.example.sportal.model.exception.MethodNotAllowedException;
-import com.example.sportal.model.exception.NotFoundException;
-import lombok.SneakyThrows;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.nio.file.Files;
+
 import java.util.List;
 
-import static com.example.sportal.service.ArticleService.UPLOADS;
 
 @RestController()
 public class ArticleController extends AbstractController {

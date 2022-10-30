@@ -21,8 +21,12 @@ public class Image {
     @JoinColumn(name = "article")
     private Article article;
 
-    public Image (String URI, Article article){
+    public Image(String URI, Article article) {
         this.URI = URI;
         this.article = article;
+    }
+
+    public Image(String URI) {
+        this.URI = URI;
     }
 }

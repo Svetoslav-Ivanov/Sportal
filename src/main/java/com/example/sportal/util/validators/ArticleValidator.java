@@ -32,7 +32,7 @@ public class ArticleValidator {
     }
 
     public boolean titleAndTextAreValid(String title, String text) {
-        if (articleRepository.existsByTitle(title)) {
+        if (articleRepository.existsByTitle(title)){
             throw new DataAlreadyExistException("This title already exists!");
         }
         return titleIsValid(title)
