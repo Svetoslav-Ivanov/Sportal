@@ -24,8 +24,8 @@ import java.util.*;
 public class UserService extends AbstractService {
 
     public static final int RESET_PASSWORD_DURATION = 20;
-    public static final String RESET_PASSWORD_MESSAGE = "Check your email address. If it exist in our system, " +
-            "you will receive a reset password link.";
+    public static final String RESET_PASSWORD_MESSAGE = "Check your email address. " +
+            "If it exist in our system, you will receive a reset password link.";
     private static final String HOST = "http://172.20.10.11:8080/users/reset-password?id=";
     @Autowired
     private BCryptPasswordEncoder encoder;

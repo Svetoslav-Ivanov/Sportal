@@ -41,7 +41,6 @@ public class ApplicationBeenConfiguration {
         props.put("mail.smtp.socketFactory.port", "465");
         props.put("mail.smtp.socketFactory.fallback", "false");
 
-
         return mailSender;
     }
 

@@ -55,11 +55,4 @@ public abstract class AbstractService {
                 .findById(id)
                 .orElseThrow(() -> new NotFoundException("Category not found!"));
     }
-
-    protected Category getCategoryByName(String name) {
-        return categoryRepository
-                .findByName(name)
-                .orElseThrow(() -> new NotFoundException("Category not found!"));
-    }
-
 }

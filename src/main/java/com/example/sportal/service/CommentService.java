@@ -99,7 +99,6 @@ public class CommentService extends AbstractService {
         throw new MethodNotAllowedException("You don`t have permission to do this action!");
     }
 
-    //TODO: Ask about transaction. When @Transactional is set, returned size is incorrect
     public int likeComment(long commentId, long userId) {
         Comment comment = getCommentById(commentId);
         User user = getUserById(userId);
