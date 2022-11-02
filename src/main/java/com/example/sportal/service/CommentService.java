@@ -1,6 +1,7 @@
 package com.example.sportal.service;
 
 import com.example.sportal.dto.comment.*;
+import com.example.sportal.dto.user.UserWithoutPasswordAndAdminDTO;
 import com.example.sportal.model.entity.Article;
 import com.example.sportal.model.entity.Comment;
 import com.example.sportal.model.entity.User;
@@ -17,7 +18,15 @@ public class CommentService extends AbstractService {
     private static final int MAX_COMMENT_LENGTH = 2_000;
 
     public CommentDTO getById(long commentId) {
-        return modelMapper.map(getCommentById(commentId), CommentDTO.class);
+        Comment comment = getCommentById(commentId);
+        if (!comment.getAuthor().isActive()) {
+            throw new NotFoundException("Comment not found!");
+        }
+        CommentDTO dto = modelMapper.map(comment, CommentDTO.class);
+        dto.setLikesCount(comment.getLikedBy().size());
+        dto.setDislikesCount(comment.getDislikedBy().size());
+        dto.setAnswersCount(comment.getAnswers().size());
+        return dto;
     }
 
     @Transactional
@@ -33,11 +42,17 @@ public class CommentService extends AbstractService {
 
     public List<CommentDTO> getAllByArticleId(long articleId) {
         List<Comment> comments = commentRepository
-                .findAllCommentsByArticleId(articleId)
-                .orElseThrow(() -> new NotFoundException("Article not found!"));
+                .getAllCommentsByArticleId(articleId);
         return comments
                 .stream()
-                .map(c -> modelMapper.map(c, CommentDTO.class))
+                .filter(c -> c.getAuthor().isActive())
+                .map(c -> {
+                   CommentDTO dto = modelMapper.map(c, CommentDTO.class);
+                   dto.setLikesCount(c.getLikedBy().size());
+                   dto.setDislikesCount(c.getDislikedBy().size());
+                   dto.setAnswersCount(c.getAnswers().size());
+                   return dto;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -88,7 +103,9 @@ public class CommentService extends AbstractService {
                 comment.getParent().getAnswers().remove(comment);
             }
             if (comment.getLikedBy() != null) {
-                comment.getLikedBy().forEach(u -> u.getLikes().remove(comment));
+                comment.getLikedBy().forEach(u -> {
+                    u.getLikes().remove(comment);
+                });
             }
             if (comment.getDislikedBy() != null) {
                 comment.getDislikedBy().forEach(u -> u.getDislikes().remove(comment));
@@ -112,6 +129,7 @@ public class CommentService extends AbstractService {
         userRepository.save(user);
         return comment.getLikedBy().size();
     }
+
     public int dislikeComment(long userId, long commentId) {
         Comment comment = getCommentById(commentId);
         User user = getUserById(userId);
@@ -127,7 +145,9 @@ public class CommentService extends AbstractService {
     }
 
     public boolean isOwner(long commentId, long userId) {
-        Comment comment = commentRepository.findCommentById(commentId).orElseThrow(() -> new NotFoundException("Comment not found"));
+        Comment comment = commentRepository
+                .findCommentById(commentId)
+                .orElseThrow(() -> new NotFoundException("Comment not found"));
         return comment.getAuthor().getId() == userId;
     }
 
@@ -137,5 +157,29 @@ public class CommentService extends AbstractService {
             return true;
         }
         throw new InvalidDataException("Invalid text!");
+    }
+
+    public List<UserWithoutPasswordAndAdminDTO> getLikedBy(long commentId) {
+        return getCommentById(commentId)
+                .getLikedBy()
+                .stream()
+                .map(u -> modelMapper.map(u, UserWithoutPasswordAndAdminDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    public List<UserWithoutPasswordAndAdminDTO> getDislikedBy(long commentId) {
+        return getCommentById(commentId)
+                .getDislikedBy()
+                .stream()
+                .map(u -> modelMapper.map(u, UserWithoutPasswordAndAdminDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    public List<CommentDTO> getReplies(long commentId) {
+        return getCommentById(commentId)
+                .getAnswers()
+                .stream().map(c -> modelMapper.map(c, CommentDTO.class))
+                .collect(Collectors.toList());
+
     }
 }

@@ -1,7 +1,6 @@
 package com.example.sportal.dto.comment;
 
-import com.example.sportal.dto.user.UserWithoutPasswordAndActiveAndAdminDTO;
-import com.example.sportal.model.entity.User;
+import com.example.sportal.dto.user.UserWithoutPasswordAndAdminDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,10 +13,15 @@ import java.util.List;
 @NoArgsConstructor
 public class CommentDTO {
     protected long id;
+    @JsonProperty("author_id")
     protected long authorId;
+    @JsonProperty("article_id")
     protected long articleId;
     protected String text;
-    protected List<UserWithoutPasswordAndActiveAndAdminDTO> likedBy;
-    protected List<UserWithoutPasswordAndActiveAndAdminDTO> dislikedBy;
-    protected List<CommentDTO> answers;
+    @JsonProperty("likes_count")
+    protected int likesCount;
+    @JsonProperty("dislikes_count")
+    protected int dislikesCount;
+    @JsonProperty("answers_count")
+    protected int answersCount;
 }

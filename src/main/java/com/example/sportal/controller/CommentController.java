@@ -1,6 +1,7 @@
 package com.example.sportal.controller;
 
 import com.example.sportal.dto.comment.*;
+import com.example.sportal.dto.user.UserWithoutPasswordAndAdminDTO;
 import com.example.sportal.model.exception.MethodNotAllowedException;
 import com.example.sportal.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,20 @@ public class CommentController extends AbstractController {
     @GetMapping("/comments/{commentId}")
     public CommentDTO getCommentById(@PathVariable long commentId) {
         return commentService.getById(commentId);
+    }
+    @GetMapping("/comments/{commentId}/likes")
+    public List<UserWithoutPasswordAndAdminDTO> getCommentLikedBy(@PathVariable long commentId) {
+        return commentService.getLikedBy(commentId);
+    }
+
+    @GetMapping("/comments/{commentId}/dislikes")
+    public List<UserWithoutPasswordAndAdminDTO> getCommentDislikedBy(@PathVariable long commentId) {
+        return commentService.getDislikedBy(commentId);
+    }
+
+    @GetMapping("/comments/{commentId}/replies")
+    public List<CommentDTO> getReplies (@PathVariable long commentId) {
+        return commentService.getReplies(commentId);
     }
 
     @PutMapping("/comments/{commentId}")

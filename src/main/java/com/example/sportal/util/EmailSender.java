@@ -12,13 +12,14 @@ public class EmailSender {
     @Autowired
     private JavaMailSender emailSender;
 
-    @Async
     public void sendMessage(String to, String subject, String text) {
+        new Thread(() -> {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom("dontforgetyourpass@abv.bg");
             message.setTo(to);
             message.setSubject(subject);
             message.setText(text);
             emailSender.send(message);
+        }).start();
     }
 }

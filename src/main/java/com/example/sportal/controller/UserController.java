@@ -18,12 +18,12 @@ public class UserController extends AbstractController {
     private UserService userService;
 
     @GetMapping("/{userId}")
-    public UserWithoutPasswordAndActiveAndAdminDTO getById(@PathVariable long userId) {
+    public UserWithoutPasswordAndAdminDTO getById(@PathVariable long userId) {
         return userService.getById(userId);
     }
 
     @PostMapping("/singup")
-    public UserWithoutPasswordAndActiveAndAdminDTO register(@RequestBody UserRegisterDTO userRegisterDTO, HttpSession session) {
+    public UserWithoutPasswordAndAdminDTO register(@RequestBody UserRegisterDTO userRegisterDTO, HttpSession session) {
         if (session.getAttribute(USER_ID) == null) {
             return userService.register(userRegisterDTO);
         }
@@ -31,11 +31,11 @@ public class UserController extends AbstractController {
     }
 
     @PutMapping("/login")
-    public UserWithoutPasswordAndActiveAndAdminDTO login(@RequestBody UserLoginDTO dto, HttpSession session, HttpServletRequest request) {
+    public UserWithoutPasswordAndAdminDTO login(@RequestBody UserLoginDTO dto, HttpSession session, HttpServletRequest request) {
         if (session.getAttribute(USER_ID) != null) {
             throw new InvalidOperationException("You are already logged in!");
         }
-        UserWithoutPasswordAndActiveAndAdminDTO loggedUserDto = userService.login(dto);
+        UserWithoutPasswordAndAdminDTO loggedUserDto = userService.login(dto);
         if (loggedUserDto != null) {
             session.setAttribute(REMOTE_ADDRESS, request.getRemoteAddr());
             session.setAttribute(USER_ID, loggedUserDto.getId());
@@ -59,7 +59,7 @@ public class UserController extends AbstractController {
     }
 
     @PutMapping("/{userId}")
-    public UserWithoutPasswordAndActiveAndAdminDTO editUser(@PathVariable long userId, @RequestBody UserEditDTO dto, HttpServletRequest request) {
+    public UserWithoutPasswordAndAdminDTO editUser(@PathVariable long userId, @RequestBody UserEditDTO dto, HttpServletRequest request) {
         long loggedUserId = getLoggedUserId(request);
         boolean isAdmin = isAdmin(request.getSession());
         if (userId == loggedUserId || isAdmin) {
@@ -74,13 +74,15 @@ public class UserController extends AbstractController {
     }
 
     @DeleteMapping("/{userId}")
-    public UserWithoutPasswordAndActiveAndAdminDTO deleteUser(@PathVariable long userId, HttpServletRequest request) {
+    public UserWithoutPasswordAndAdminDTO deleteUser(@PathVariable long userId, HttpServletRequest request) {
         long loggedUserId = getLoggedUserId(request);
         if (userId == loggedUserId || isAdmin(request.getSession())) {
             if (userId == loggedUserId) {
                 request.getSession().invalidate();
             }
-            return userService.delete(userId);
+            UserWithoutPasswordAndAdminDTO dto = userService.delete(userId);
+            request.getSession().invalidate();
+            return dto;
         }
         throw new MethodNotAllowedException("You don`t have permission to do this action!");
     }

@@ -1,5 +1,6 @@
 package com.example.sportal.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 public class ExceptionDTO {
 
     private int status;
+    @JsonProperty("date_time")
     private LocalDateTime dateTime;
     private String message;
 }

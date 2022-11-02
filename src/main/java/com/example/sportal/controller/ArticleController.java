@@ -69,7 +69,7 @@ public class ArticleController extends AbstractController {
     }
 
     @GetMapping("/categories/{categoryId}/articles")
-    public List<ArticleDTO> getAllArticlesByCategoryName(@PathVariable long categoryId) {
+    public List<ArticleDTO> getAllArticlesByCategoryId(@PathVariable long categoryId) {
         return articleService.getAllByCategoryId(categoryId);
     }
 

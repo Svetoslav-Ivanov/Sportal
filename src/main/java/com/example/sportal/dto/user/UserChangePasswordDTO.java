@@ -10,5 +10,6 @@ import lombok.Setter;
 @NoArgsConstructor
 public class UserChangePasswordDTO {
     private String password;
+    @JsonProperty("confirm_password")
     private String confirmPassword;
 }

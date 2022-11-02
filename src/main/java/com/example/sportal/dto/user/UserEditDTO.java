@@ -10,6 +10,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class UserEditDTO extends UserRegisterDTO {
+    @JsonProperty("new_password")
     private String newPassword;
     private boolean admin;
 }

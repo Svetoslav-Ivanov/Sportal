@@ -13,7 +13,7 @@ import java.nio.file.Files;
 import static com.example.sportal.service.ArticleService.UPLOADS;
 
 @RestController
-public class ImageController {
+public class ImageController extends AbstractController{
     @SneakyThrows
     @GetMapping("/articles/images/{filePath}")
     public void downloadImageByPath(@PathVariable String filePath, HttpServletResponse response) {

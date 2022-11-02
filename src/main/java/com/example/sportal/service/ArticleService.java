@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
@@ -91,10 +92,9 @@ public class ArticleService extends AbstractService {
             articleRepository.save(article);
             return modelMapper.map(article, ArticleDTO.class);
         }
-        throw new InvalidDataException("Invalid data given! ");
+        throw new InvalidDataException("Invalid data given!");
     }
 
-    //    TODO: @Transactional
     public ArticleDTO editArticle(long articleId, String title,
                                   String text, long categoryId,
                                   MultipartFile[] multipartFiles) {
@@ -139,13 +139,10 @@ public class ArticleService extends AbstractService {
     public List<ArticleDTO> searchByTitle(String text) {
         List<Article> articles = articleRepository
                 .findAllByTitleContainingIgnoreCaseOrTextContainingIgnoreCase(text, text);
-        if (articles.size() > 0) {
-            return articles
-                    .stream()
-                    .map(a -> modelMapper.map(a, ArticleDTO.class))
-                    .collect(Collectors.toList());
-        }
-        throw new NotFoundException("Articles not found!");
+        return articles
+                .stream()
+                .map(a -> modelMapper.map(a, ArticleDTO.class))
+                .collect(Collectors.toList());
     }
 
     @Transactional

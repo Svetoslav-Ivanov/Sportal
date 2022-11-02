@@ -13,6 +13,7 @@ import lombok.Setter;
 public class UserRegisterDTO {
     protected String username;
     protected String password;
+    @JsonProperty("confirm_password")
     protected String confirmPassword;
     protected String email;
 }

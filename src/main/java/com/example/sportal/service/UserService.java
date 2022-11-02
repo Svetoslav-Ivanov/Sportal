@@ -12,12 +12,14 @@ import com.example.sportal.repository.ResetPasswordLinkRepository;
 import com.example.sportal.util.EmailSender;
 import com.example.sportal.util.validators.UserValidator;
 
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.net.Inet4Address;
 import java.util.*;
 
 @Service
@@ -26,7 +28,7 @@ public class UserService extends AbstractService {
     public static final int RESET_PASSWORD_DURATION = 20;
     public static final String RESET_PASSWORD_MESSAGE = "Check your email address. " +
             "If it exist in our system, you will receive a reset password link.";
-    private static final String HOST = "http://172.20.10.11:8080/users/reset-password?id=";
+    private static final String HOST = "http://%s:8080/users/reset-password?id=%s";
     @Autowired
     private BCryptPasswordEncoder encoder;
     @Autowired
@@ -36,12 +38,12 @@ public class UserService extends AbstractService {
     @Autowired
     private UserValidator userValidator;
 
-    public UserWithoutPasswordAndActiveAndAdminDTO getById(long id) {
+    public UserWithoutPasswordAndAdminDTO getById(long id) {
         User user = getUserById(id);
-        return modelMapper.map(user, UserWithoutPasswordAndActiveAndAdminDTO.class);
+        return modelMapper.map(user, UserWithoutPasswordAndAdminDTO.class);
     }
 
-    public UserWithoutPasswordAndActiveAndAdminDTO register(UserRegisterDTO userRegisterDTO) {
+    public UserWithoutPasswordAndAdminDTO register(UserRegisterDTO userRegisterDTO) {
         if (!userValidator.emailIsValid(userRegisterDTO.getEmail())) {
             throw new InvalidDataException("Invalid email given!");
         }
@@ -63,11 +65,11 @@ public class UserService extends AbstractService {
         user.setAdmin(false);
         user.setPassword(encoder.encode(userRegisterDTO.getPassword()));
         userRepository.save(user);
-        return modelMapper.map(user, UserWithoutPasswordAndActiveAndAdminDTO.class);
+        return modelMapper.map(user, UserWithoutPasswordAndAdminDTO.class);
     }
 
     @Transactional
-    public UserWithoutPasswordAndActiveAndAdminDTO edit(long userId, @RequestBody UserEditDTO dto) {
+    public UserWithoutPasswordAndAdminDTO edit(long userId, @RequestBody UserEditDTO dto) {
         User user = getUserById(userId);
         if (userValidator.usernameIsValid(dto.getUsername())
                 && userValidator.usernameIsNotForeign(user, dto.getUsername())) {
@@ -88,11 +90,11 @@ public class UserService extends AbstractService {
         }
         user.setAdmin(dto.isAdmin());
         userRepository.save(user);
-        return modelMapper.map(user, UserWithoutPasswordAndActiveAndAdminDTO.class);
+        return modelMapper.map(user, UserWithoutPasswordAndAdminDTO.class);
     }
 
     @Transactional
-    public UserWithoutPasswordAndActiveAndAdminDTO delete(long id) {
+    public UserWithoutPasswordAndAdminDTO delete(long id) {
         User user = getUserById(id);
         String deletedAt = "Deleted at " + Calendar.getInstance().getTime();
         user.setActive(false);
@@ -100,20 +102,25 @@ public class UserService extends AbstractService {
         user.setUsername(deletedAt);
         user.setEmail(deletedAt);
         user.setPassword(deletedAt);
+        user.setLikes(null);
+        user.setDislikes(null);
+        commentRepository.deleteAll(user.getComments());
+        user.setComments(null);
         userRepository.save(user);
-        return modelMapper.map(user, UserWithoutPasswordAndActiveAndAdminDTO.class);
+        return modelMapper.map(user, UserWithoutPasswordAndAdminDTO.class);
     }
 
-    public UserWithoutPasswordAndActiveAndAdminDTO login(UserLoginDTO dto) {
+    public UserWithoutPasswordAndAdminDTO login(UserLoginDTO dto) {
         String login = dto.getLogin().trim();
         String password = dto.getPassword().trim();
         User user = getUserByUsernameOrEmail(login, login);
         if (!encoder.matches(password, user.getPassword())) {
             throw new AuthenticationException("Wrong credentials");
         }
-        return modelMapper.map(user, UserWithoutPasswordAndActiveAndAdminDTO.class);
+        return modelMapper.map(user, UserWithoutPasswordAndAdminDTO.class);
     }
 
+    @SneakyThrows
     @Transactional
     public boolean requestResetPassword(String email) {
         Optional<User> user = userRepository.findUserByEmail(email);
@@ -123,7 +130,8 @@ public class UserService extends AbstractService {
         }
         ResetPasswordLink link = new ResetPasswordLink();
         String resetId = createRandomURI();
-        String URL = HOST + resetId;
+        String URL = String.format(HOST,
+                Inet4Address.getLocalHost().getHostAddress(), resetId);
         link.setURI(resetId);
         link.setIntendedFor(user.get());
         Calendar expiresAt = Calendar.getInstance();

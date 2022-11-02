@@ -59,7 +59,7 @@ public abstract class AbstractController {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(AuthenticationException.class)
     public ExceptionDTO handleAuthenticationException(Exception e) {
-        return createExceptionDTO("Authentication filed: " + e.getMessage(),
+        return createExceptionDTO("Authentication failed: " + e.getMessage(),
                 HttpStatus.UNAUTHORIZED.value());
     }
 
