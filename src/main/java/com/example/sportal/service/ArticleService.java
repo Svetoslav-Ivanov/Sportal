@@ -10,7 +10,9 @@ import com.example.sportal.model.exception.ServerException;
 import com.example.sportal.repository.CategoryRepository;
 
 import com.example.sportal.util.validators.ArticleValidator;
+import lombok.SneakyThrows;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.tika.Tika;
 import org.modelmapper.ModelMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +24,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
@@ -31,7 +32,6 @@ import java.util.stream.Collectors;
 @Service
 public class ArticleService extends AbstractService {
     public static final String UPLOADS = "uploads";
-    public static final String IMAGES = "images";
 
     @Autowired
     private CategoryRepository categoryRepository;
@@ -70,6 +70,7 @@ public class ArticleService extends AbstractService {
         return dto;
     }
 
+    @SneakyThrows
     public ArticleDTO createArticle(String title, String text,
                                     long categoryId,
                                     MultipartFile[] multipartFiles,
@@ -87,7 +88,7 @@ public class ArticleService extends AbstractService {
             article.setAuthor(getUserById(authorId));
             article.setDailyViews(0);
             article.setCategory(getCategoryById(categoryId));
-            List<Image> images = createImages(multipartFiles, article);
+            List<Image> images = createImages(multipartFiles, article, authorId);
             article.setImages(images);
             articleRepository.save(article);
             return modelMapper.map(article, ArticleDTO.class);
@@ -95,6 +96,7 @@ public class ArticleService extends AbstractService {
         throw new InvalidDataException("Invalid data given!");
     }
 
+    @SneakyThrows
     public ArticleDTO editArticle(long articleId, String title,
                                   String text, long categoryId,
                                   MultipartFile[] multipartFiles) {
@@ -105,7 +107,7 @@ public class ArticleService extends AbstractService {
             article.setCategory(categoryRepository.getById(categoryId));
             if (multipartFiles != null && multipartFiles.length > 0) {
                 article.getImages().forEach(imageService::deleteImage);
-                List<Image> images = createImages(multipartFiles, article);
+                List<Image> images = createImages(multipartFiles, article, article.getAuthor().getId());
                 article.setImages(images);
             } else {
                 throw new InvalidDataException("The article must have at least one image!");
@@ -146,12 +148,17 @@ public class ArticleService extends AbstractService {
     }
 
     @Transactional
-    protected List<Image> createImages(MultipartFile[] multipartFiles, Article article) {
+    protected List<Image> createImages(MultipartFile[] multipartFiles, Article article, long userId) throws IOException {
         List<Image> images = new ArrayList<>();
+        Tika tika = new Tika();
         for (MultipartFile image : multipartFiles) {
+            String type = tika.detect(image.getBytes());
+            if (!type.split("/")[0].equals("image")) {
+                throw new InvalidDataException("Invalid image given");
+            }
             String ext = FilenameUtils.getExtension(image.getOriginalFilename());
             String name = System.nanoTime() + "." + ext;
-            File file = new File(UPLOADS + File.separator + name);
+            File file = new File(UPLOADS + "-" + userId + File.separator + name);
             if (!file.exists()) {
                 try {
                     Files.copy(image.getInputStream(), file.toPath());
