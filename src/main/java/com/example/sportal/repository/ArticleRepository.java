@@ -20,9 +20,10 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 
     boolean existsByTitle(String title);
 
-    List<Article> findAllByTitleContainingIgnoreCaseOrTextContainingIgnoreCase(String title, String text);
-
     Optional<Article> findByTitle(String articleId);
 
     Article getById(long articleId);
+
+    List<Article> getArticlesByTitleContainingIgnoreCaseOrTextContainingIgnoreCase(String title, String text);
+
 }

@@ -140,7 +140,7 @@ public class ArticleService extends AbstractService {
 
     public List<ArticleDTO> searchByTitle(String text) {
         List<Article> articles = articleRepository
-                .findAllByTitleContainingIgnoreCaseOrTextContainingIgnoreCase(text, text);
+                .getArticlesByTitleContainingIgnoreCaseOrTextContainingIgnoreCase(text.trim(),text.trim());
         return articles
                 .stream()
                 .map(a -> modelMapper.map(a, ArticleDTO.class))

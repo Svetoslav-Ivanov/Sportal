@@ -14,7 +14,7 @@ import java.util.List;
 @Setter
 @Entity
 @Table(name = "articles",
-        indexes = @Index(name = "titleIndex", columnList = "title"))
+        indexes = {@Index(name = "titleIndex", columnList = "title"),@Index(name = "textIndex", columnList = "text")})
 public class Article {
 
     @Id
