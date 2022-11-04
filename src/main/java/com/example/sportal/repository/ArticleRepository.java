@@ -3,6 +3,7 @@ package com.example.sportal.repository;
 import com.example.sportal.model.entity.Article;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -25,5 +26,10 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     Article getById(long articleId);
 
     List<Article> getArticlesByTitleContainingIgnoreCaseOrTextContainingIgnoreCase(String title, String text);
+
+    @Modifying
+    @Query(value = "UPDATE articles SET daily_views = 0",
+            nativeQuery = true)
+    void clearDailyViews();
 
 }

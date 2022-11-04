@@ -129,13 +129,8 @@ public class ArticleService extends AbstractService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional
     public void clearDailyViews() {
-        List<Article> articles = articleRepository.findAll();
-        articles.forEach(a -> {
-            a.setViews(0);
-            articleRepository.save(a);
-        });
+        articleRepository.clearDailyViews();
     }
 
     public List<ArticleDTO> searchByTitle(String text) {

@@ -16,10 +16,7 @@ public class ResetPasswordLinkService {
     }
 
     public void clearExpiredLinks() {
-        resetPasswordLinkRepository
-                .findAll()
-                .removeIf(l -> l.getExpiresAt()
-                        .before(Calendar.getInstance().getTime()));
+        resetPasswordLinkRepository.clearExpiredLinksg();
     }
 }
 
