@@ -16,7 +16,7 @@ public class ResetPasswordLinkService {
     }
 
     public void clearExpiredLinks() {
-        resetPasswordLinkRepository.clearExpiredLinksg();
+        resetPasswordLinkRepository.clearExpiredLinks();
     }
 }
 
